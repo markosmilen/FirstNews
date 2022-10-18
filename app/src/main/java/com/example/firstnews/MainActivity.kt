@@ -7,7 +7,9 @@ import com.example.firstnews.databinding.ActivityMainBinding
 import com.example.firstnews.features.bookmarks.BookmarksFragment
 import com.example.firstnews.features.breakingnews.BreakingNewsFragment
 import com.example.firstnews.features.searchnews.SearchNewsFragment
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding

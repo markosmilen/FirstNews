@@ -1,4 +1,4 @@
-package com.example.firstnews.features.data
+package com.example.firstnews.data
 
 import androidx.room.Dao
 import androidx.room.Insert

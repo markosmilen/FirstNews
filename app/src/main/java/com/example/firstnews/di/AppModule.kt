@@ -1,9 +1,9 @@
-package com.example.firstnews.features.di
+package com.example.firstnews.di
 
 import android.app.Application
 import androidx.room.Room
-import com.example.firstnews.features.api.NewsAPI
-import com.example.firstnews.features.data.NewsArticleDatabase
+import com.example.firstnews.api.NewsAPI
+import com.example.firstnews.data.NewsArticleDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

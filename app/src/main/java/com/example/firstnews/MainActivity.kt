@@ -61,9 +61,9 @@ class MainActivity : AppCompatActivity() {
             bookmarksFragment = BookmarksFragment()
 
             supportFragmentManager.beginTransaction()
-                .add(breakingNewsFragment, TAG_BREAKING_NEWS_FRAGMENT)
-                .add(searchNewsFragment, TAG_SEARCH_NEWS_FRAGMENT)
-                .add(bookmarksFragment, TAG_BOOKMARKS_FRAGMENT)
+                .add(R.id.fragment_container, breakingNewsFragment, TAG_BREAKING_NEWS_FRAGMENT)
+                .add(R.id.fragment_container, searchNewsFragment, TAG_SEARCH_NEWS_FRAGMENT)
+                .add(R.id.fragment_container, bookmarksFragment, TAG_BOOKMARKS_FRAGMENT)
                 .commit()
 
         } else {
@@ -89,6 +89,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_bookmarks -> bookmarksFragment
                 else -> throw java.lang.IllegalArgumentException("Unexpected Error")
             }
+
             selectFragment(fragment)
             true
         }
@@ -106,10 +107,7 @@ class MainActivity : AppCompatActivity() {
         } else{
             super.onBackPressed()
         }
-
     }
-
-
 }
 
 private const val TAG_BREAKING_NEWS_FRAGMENT = "TAG_BREAKING_NEWS_FRAGMENT"

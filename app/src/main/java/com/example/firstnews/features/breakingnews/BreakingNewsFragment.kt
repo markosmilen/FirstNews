@@ -2,6 +2,7 @@ package com.example.firstnews.features.breakingnews
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -10,6 +11,7 @@ import com.example.firstnews.R
 import com.example.firstnews.databinding.FragmentBreakingNewsBinding
 import com.example.firstnews.data.NewsArticle
 import com.example.firstnews.shared.NewsArticleListAdapter
+import com.example.firstnews.util.Resource
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 
@@ -34,8 +36,20 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
             }
 
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-                viewModel.breakingNews.collect { articles ->
-                    articleListAdapter.submitList(articles)
+                viewModel.breakingNews.collect {
+                    val articles = it ?: return@collect
+
+                    swipeRefreshLayout.isRefreshing = articles is Resource.Loading
+                    recyclerView.isVisible = !articles.data.isNullOrEmpty()
+                    textViewError.isVisible =
+                        articles.error != null && articles.data.isNullOrEmpty()
+                    textViewError.text = getString(
+                        R.string.could_not_refresh,
+                        articles.error?.localizedMessage ?: R.string.unknown_error_occurred
+                    )
+                    buttonRetry.isVisible = articles.error != null && articles.data.isNullOrEmpty()
+
+                    articleListAdapter.submitList(articles.data)
                 }
             }
         }

@@ -5,6 +5,9 @@ import com.example.firstnews.api.NewsAPI
 import com.example.firstnews.util.Resource
 import com.example.firstnews.util.networkBoundResource
 import kotlinx.coroutines.flow.Flow
+import retrofit2.HttpException
+import java.io.IOError
+import java.io.IOException
 import javax.inject.Inject
 
 
@@ -16,7 +19,10 @@ class NewsRepository @Inject constructor(
     private val newsDAO: NewsArticleDao =
         articleDatabase.newsArticleDao()
 
-    fun getBreakingNews(): Flow<Resource<List<NewsArticle>>> =
+    fun getBreakingNews(
+        onFetchSuccess: () -> Unit,
+        onFetchFailed: (Throwable) -> Unit
+    ): Flow<Resource<List<NewsArticle>>> =
         networkBoundResource(
             query = {
                 newsDAO.getAllBreakingNewsArticles()
@@ -47,7 +53,18 @@ class NewsRepository @Inject constructor(
                     newsDAO.insertBreakingNews(breakingNews)
                     newsDAO.insertArticles(breakingNewsArticles)
                 }
+            },
+
+            onFetchSuccess = onFetchSuccess,
+
+            onFetchFailed = {
+                if (it !is HttpException && it !is IOException) {
+                    throw it
+                }
+                onFetchFailed(it)
             }
+
+
         )
 
 

@@ -12,7 +12,9 @@ inline fun <ResultType, RequestType> networkBoundResource (
     crossinline query: () -> Flow<ResultType>,
     crossinline fetch: suspend () -> RequestType,
     crossinline saveFetchResult: suspend (RequestType) -> Unit,
-    crossinline shouldFetch: (ResultType) -> Boolean = { true }
+    crossinline shouldFetch: (ResultType) -> Boolean = { true },
+    crossinline onFetchSuccess: () -> Unit = {},
+    crossinline onFetchFailed: (Throwable) -> Unit = {}
 ) = channelFlow {
     val data = query().first()
 
@@ -25,10 +27,12 @@ inline fun <ResultType, RequestType> networkBoundResource (
         try {
             delay(7000)
             saveFetchResult(fetch())
+            onFetchSuccess()
             loading.cancel()
             query().collect {  send(Resource.Success(it))}
         } catch (t: Throwable) {
             loading.cancel()
+            onFetchFailed(t)
             query().collect {  send(Resource.Error(it, t))}
         }
     } else {

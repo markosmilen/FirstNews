@@ -10,6 +10,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltViewModel
@@ -20,13 +21,15 @@ class BreakingNewsViewModel @Inject constructor(
     private val eventChannel = Channel<Event>()
     val events = eventChannel.receiveAsFlow()
 
-    private val refreshTriggerChannel = Channel<Unit> { }
+    private val refreshTriggerChannel = Channel<Refresh> { }
     val refreshTrigger = refreshTriggerChannel.receiveAsFlow()
 
     var pendingScrollToTopLocation = false
 
     val breakingNews = refreshTrigger.flatMapLatest {
+
         newsRepository.getBreakingNews(
+            it == Refresh.FORCE,
             onFetchSuccess = {
                 pendingScrollToTopLocation = true
             },
@@ -42,18 +45,31 @@ class BreakingNewsViewModel @Inject constructor(
     fun onManualRefresh() {
         if (breakingNews.value !is Resource.Loading) {
             viewModelScope.launch {
-                refreshTriggerChannel.send(Unit)
+                refreshTriggerChannel.send(Refresh.FORCE)
             }
         }
 
     }
 
+    init {
+        viewModelScope.launch {
+            newsRepository.deleteAllArticlesOlderThan(
+                System.currentTimeMillis() -
+                        TimeUnit.DAYS.toMillis(7)
+            )
+        }
+    }
+
     fun onStart() {
         if (breakingNews.value !is Resource.Loading) {
             viewModelScope.launch {
-                refreshTriggerChannel.send(Unit)
+                refreshTriggerChannel.send(Refresh.NORMAL)
             }
         }
+    }
+
+    enum class Refresh{
+        FORCE, NORMAL
     }
 
     sealed class Event {

@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import retrofit2.HttpException
 import java.io.IOError
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 
@@ -20,6 +21,7 @@ class NewsRepository @Inject constructor(
         articleDatabase.newsArticleDao()
 
     fun getBreakingNews(
+        forceRefresh: Boolean,
         onFetchSuccess: () -> Unit,
         onFetchFailed: (Throwable) -> Unit
     ): Flow<Resource<List<NewsArticle>>> =
@@ -54,6 +56,20 @@ class NewsRepository @Inject constructor(
                     newsDAO.insertArticles(breakingNewsArticles)
                 }
             },
+            shouldFetch = { cashedArticles ->
+                if (forceRefresh) {
+                    true
+                } else {
+                    val sortedArticles = cashedArticles.sortedBy {
+                        it.updatedAt
+                    }
+                    val oldestTimeStamp = sortedArticles.firstOrNull()?.updatedAt
+                    val needsRefresh = oldestTimeStamp == null ||
+                            oldestTimeStamp < System.currentTimeMillis() -
+                            TimeUnit.MINUTES.toMillis(5)
+                    needsRefresh
+                }
+            },
 
             onFetchSuccess = onFetchSuccess,
 
@@ -66,6 +82,10 @@ class NewsRepository @Inject constructor(
 
 
         )
+
+    suspend fun deleteAllArticlesOlderThan(timestampInMillis: Long){
+        newsDAO.deleteAllArticlesOlderThan(timestampInMillis)
+    }
 
 
 }

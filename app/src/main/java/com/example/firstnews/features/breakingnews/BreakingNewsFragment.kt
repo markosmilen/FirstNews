@@ -1,5 +1,7 @@
 package com.example.firstnews.features.breakingnews
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
@@ -34,13 +36,23 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
 
         val binding = FragmentBreakingNewsBinding.bind(view)
 
-        val articleListAdapter = NewsArticleListAdapter()
+        val articleListAdapter = NewsArticleListAdapter(
+            onItemClicked = { article ->
+                val uri = Uri.parse(article.url)
+                val intent = Intent(Intent.ACTION_VIEW, uri)
+                requireActivity().startActivity(intent)
+            },
+            onBookmarkedClicked = { article ->
+                viewModel.onBookmarkedClicked(article)
+            }
+        )
 
         binding.apply {
             recyclerView.apply {
                 adapter = articleListAdapter
                 layoutManager = LinearLayoutManager(requireContext())
                 setHasFixedSize(true)
+                itemAnimator?.changeDuration = 0
             }
 
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {

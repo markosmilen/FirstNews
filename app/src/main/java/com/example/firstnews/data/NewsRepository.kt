@@ -5,6 +5,7 @@ import com.example.firstnews.api.NewsAPI
 import com.example.firstnews.util.Resource
 import com.example.firstnews.util.networkBoundResource
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import retrofit2.HttpException
 import java.io.IOError
 import java.io.IOException
@@ -34,13 +35,19 @@ class NewsRepository @Inject constructor(
                 response.articles
             },
             saveFetchResult = { serverBreakingNewsArticles ->
+                val bookmarkedArticles = newsDAO.getAllBookmarkedArticles().first()
+
                 val breakingNewsArticles =
                     serverBreakingNewsArticles.map {
+                        val isBookmarked = bookmarkedArticles.any {bookmarkedArticle ->
+                            bookmarkedArticle.url == it.url
+                        }
+
                         NewsArticle(
                             title = it.title,
                             url = it.url,
                             thumbnailURL = it.urlToImage,
-                            isBookmarked = false
+                            isBookmarked = isBookmarked
                         )
                     }
 
@@ -82,6 +89,18 @@ class NewsRepository @Inject constructor(
 
 
         )
+
+    fun getAllBookmarkedArticles(): Flow<List<NewsArticle>> =
+        newsDAO.getAllBookmarkedArticles()
+
+    suspend fun resetAllBookmarks() {
+        newsDAO.resetAllBookmarks()
+    }
+
+
+    suspend fun updateArticle(article: NewsArticle){
+        newsDAO.updateArticle(article)
+    }
 
     suspend fun deleteAllArticlesOlderThan(timestampInMillis: Long){
         newsDAO.deleteAllArticlesOlderThan(timestampInMillis)

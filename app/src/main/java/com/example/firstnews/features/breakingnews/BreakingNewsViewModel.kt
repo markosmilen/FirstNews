@@ -60,6 +60,15 @@ class BreakingNewsViewModel @Inject constructor(
         }
     }
 
+    fun onBookmarkedClicked(article: NewsArticle){
+        val currentlyBookmarked = article.isBookmarked
+        val updatedArticle = article.copy(isBookmarked = !currentlyBookmarked)
+
+        viewModelScope.launch {
+            newsRepository.updateArticle(updatedArticle)
+        }
+    }
+
     fun onStart() {
         if (breakingNews.value !is Resource.Loading) {
             viewModelScope.launch {

@@ -6,11 +6,28 @@ import androidx.recyclerview.widget.ListAdapter
 import com.example.firstnews.databinding.ItemNewsArticleBinding
 import com.example.firstnews.data.NewsArticle
 
-class NewsArticleListAdapter: ListAdapter<NewsArticle, NewsArticleViewHolder>(NewsArticleComparator()) {
+class NewsArticleListAdapter(
+    private val onItemClicked: (NewsArticle) -> Unit,
+    private val onBookmarkedClicked: (NewsArticle) -> Unit
+) :
+    ListAdapter<NewsArticle, NewsArticleViewHolder>(NewsArticleComparator()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NewsArticleViewHolder {
-        val binding = ItemNewsArticleBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return NewsArticleViewHolder(binding)
+        val binding =
+            ItemNewsArticleBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return NewsArticleViewHolder(binding,
+            onItemClicked = { position ->
+                val article = getItem(position)
+                if (article != null){
+                    onItemClicked(article)
+                }
+            },
+            onBookmarkedClicked = { position ->
+                val article = getItem(position)
+                if (article != null){
+                    onBookmarkedClicked(article)
+                }
+            })
     }
 
     override fun onBindViewHolder(holder: NewsArticleViewHolder, position: Int) {

@@ -34,4 +34,12 @@ interface NewsArticleDao {
     @Query("DELETE FROM news_articles WHERE updatedAt < :timeStampInMillis AND isBookmarked = 0")
     suspend fun deleteAllArticlesOlderThan(timeStampInMillis: Long)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSearchResults(searchResults: List<SearchResult>)
+
+    @Query("DELETE FROM search_result WHERE searchQuery = :query")
+    suspend fun deleteSearchResultsForQuery(query: String)
+
+    @Query("SELECT max(searchQuery) FROM search_result WHERE searchQuery = :searchQuery")
+    suspend fun getLastQueryPosition(searchQuery: String): Int?
 }

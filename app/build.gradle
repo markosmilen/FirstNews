@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace 'com.example.firstnews'
-    compileSdk 32
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.example.firstnews"
@@ -39,6 +39,7 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    buildToolsVersion '29.0.3'
 }
 
 dependencies {
@@ -79,6 +80,7 @@ dependencies {
     //Fragment
     implementation("androidx.fragment:fragment-ktx:1.5.3")
 
+    implementation 'androidx.room:room-paging:2.5.0'
 }
 
 kapt {

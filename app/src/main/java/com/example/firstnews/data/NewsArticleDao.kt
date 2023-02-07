@@ -1,5 +1,6 @@
 package com.example.firstnews.data
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -12,6 +13,9 @@ interface NewsArticleDao {
 
     @Query("SELECT * FROM breaking_news INNER JOIN news_articles ON articleUrl = url")
     fun getAllBreakingNewsArticles(): Flow<List<NewsArticle>>
+
+    @Query("SELECT * FROM SEARCH_RESULT INNER JOIN news_articles ON articleUrl == url WHERE  searchQuery = :query ORDER BY queryPosition")
+    fun getSearchResultsArticlesPaged(query: String): PagingSource<Int, NewsArticle>
 
     @Query("SELECT * FROM news_articles WHERE isBookmarked = 1")
     fun getAllBookmarkedArticles(): Flow<List<NewsArticle>>

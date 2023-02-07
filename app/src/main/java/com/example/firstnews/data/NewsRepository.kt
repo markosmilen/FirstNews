@@ -1,5 +1,7 @@
 package com.example.firstnews.data
 
+import androidx.paging.*
+import androidx.room.Query
 import androidx.room.withTransaction
 import com.example.firstnews.api.NewsAPI
 import com.example.firstnews.util.Resource
@@ -89,6 +91,15 @@ class NewsRepository @Inject constructor(
 
 
         )
+
+    @OptIn(ExperimentalPagingApi::class)
+    fun getSearchResultsPaged(query: String): Flow<PagingData<NewsArticle>> =
+    Pager(
+        config = PagingConfig(pageSize = 20, maxSize = 200),
+        remoteMediator = SearchNewsRemoteMediator(query, newsAPI, articleDatabase),
+        pagingSourceFactory = { newsDAO.getSearchResultsArticlesPaged(query)}
+    ).flow
+
 
     fun getAllBookmarkedArticles(): Flow<List<NewsArticle>> =
         newsDAO.getAllBookmarkedArticles()

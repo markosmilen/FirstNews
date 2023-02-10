@@ -15,6 +15,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.firstnews.MainActivity
 import com.example.firstnews.R
 import com.example.firstnews.databinding.FragmentBreakingNewsBinding
 import com.example.firstnews.data.NewsArticle
@@ -26,15 +27,19 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
-class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
+class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news),
+    MainActivity.OnBottomNavigationReselectedListener {
 
     private val viewModel: BreakingNewsViewModel by viewModels()
+
+    private var currentBinding: FragmentBreakingNewsBinding? = null
+    private val binding get() = currentBinding!!
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val binding = FragmentBreakingNewsBinding.bind(view)
+        currentBinding = FragmentBreakingNewsBinding.bind(view)
 
         val articleListAdapter = NewsArticleListAdapter(
             onItemClicked = { article ->
@@ -110,6 +115,7 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
             override fun onPrepareMenu(menu: Menu) {
                 // Handle for example visibility of menu items
             }
+
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.menu_breaking_news, menu)
             }
@@ -132,5 +138,14 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
     override fun onStart() {
         super.onStart()
         viewModel.onStart()
+    }
+
+    override fun onBottomNavigationFragmentReselected() {
+        binding.recyclerView.scrollToPosition(0)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        currentBinding = null
     }
 }

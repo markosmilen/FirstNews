@@ -90,11 +90,24 @@ class MainActivity : AppCompatActivity() {
                 else -> throw java.lang.IllegalArgumentException("Unexpected Error")
             }
 
+            if (selectedFragment === fragment) {
+                if (fragment is OnBottomNavigationReselectedListener) {
+                    fragment.onBottomNavigationFragmentReselected()
+                }
+            } else {
+                selectFragment(fragment)
+            }
+
             selectFragment(fragment)
             true
         }
 
     }
+
+    interface OnBottomNavigationReselectedListener {
+        fun onBottomNavigationFragmentReselected()
+    }
+
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)

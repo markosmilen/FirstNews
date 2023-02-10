@@ -15,6 +15,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.firstnews.MainActivity
 import com.example.firstnews.R
 import com.example.firstnews.databinding.FragmentBookmarksBinding
 import com.example.firstnews.shared.NewsArticleListAdapter
@@ -22,14 +23,18 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
-class BookmarksFragment : Fragment(R.layout.fragment_bookmarks) {
+class BookmarksFragment : Fragment(R.layout.fragment_bookmarks),
+    MainActivity.OnBottomNavigationReselectedListener {
 
     private val viewModel: BookmarksViewModel by viewModels()
+
+    private var currentBinding: FragmentBookmarksBinding? = null
+    private val binding get() = currentBinding!!
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val binding = FragmentBookmarksBinding.bind(view)
+        currentBinding = FragmentBookmarksBinding.bind(view)
 
         val bookmarksAdapter = NewsArticleListAdapter(
             onItemClicked = { article ->
@@ -50,7 +55,7 @@ class BookmarksFragment : Fragment(R.layout.fragment_bookmarks) {
             }
 
             viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-                viewModel.bookmarks.collect{
+                viewModel.bookmarks.collect {
                     val bookmarks = it ?: return@collect
 
                     bookmarksAdapter.submitList(bookmarks)
@@ -67,6 +72,7 @@ class BookmarksFragment : Fragment(R.layout.fragment_bookmarks) {
             override fun onPrepareMenu(menu: Menu) {
                 // Handle for example visibility of menu items
             }
+
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.menu_bookmarks, menu)
             }
@@ -84,4 +90,16 @@ class BookmarksFragment : Fragment(R.layout.fragment_bookmarks) {
 
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
+
+    override fun onBottomNavigationFragmentReselected() {
+        binding.recyclerView.scrollToPosition(0)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        currentBinding = null
+    }
+
 }
+
+

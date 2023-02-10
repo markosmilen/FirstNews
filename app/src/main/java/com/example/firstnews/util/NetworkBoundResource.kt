@@ -1,10 +1,8 @@
 package com.example.firstnews.util
 
-import com.example.firstnews.api.NewsResponse
-import kotlinx.coroutines.delay
+
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -25,7 +23,6 @@ inline fun <ResultType, RequestType> networkBoundResource (
         }
 
         try {
-            delay(7000)
             saveFetchResult(fetch())
             onFetchSuccess()
             loading.cancel()

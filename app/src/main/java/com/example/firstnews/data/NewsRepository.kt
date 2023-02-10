@@ -75,7 +75,7 @@ class NewsRepository @Inject constructor(
                     val oldestTimeStamp = sortedArticles.firstOrNull()?.updatedAt
                     val needsRefresh = oldestTimeStamp == null ||
                             oldestTimeStamp < System.currentTimeMillis() -
-                            TimeUnit.MINUTES.toMillis(5)
+                            TimeUnit.MINUTES.toMillis(60)
                     needsRefresh
                 }
             },
@@ -93,10 +93,10 @@ class NewsRepository @Inject constructor(
         )
 
     @OptIn(ExperimentalPagingApi::class)
-    fun getSearchResultsPaged(query: String): Flow<PagingData<NewsArticle>> =
+    fun getSearchResultsPaged(query: String, refreshOnInit: Boolean): Flow<PagingData<NewsArticle>> =
     Pager(
         config = PagingConfig(pageSize = 20, maxSize = 200),
-        remoteMediator = SearchNewsRemoteMediator(query, newsAPI, articleDatabase),
+        remoteMediator = SearchNewsRemoteMediator(query, newsAPI, articleDatabase, refreshOnInit),
         pagingSourceFactory = { newsDAO.getSearchResultsArticlesPaged(query)}
     ).flow
 

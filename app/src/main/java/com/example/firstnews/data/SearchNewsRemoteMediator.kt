@@ -6,7 +6,6 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import com.example.firstnews.api.NewsAPI
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import retrofit2.HttpException
 import java.io.IOException
@@ -17,7 +16,8 @@ private const val NEWS_STARTING_PAGE_INDEX = 1
 class SearchNewsRemoteMediator(
     private val searchQuery: String,
     private val newsApi: NewsAPI,
-    private val newsArticleDb: NewsArticleDatabase
+    private val newsArticleDb: NewsArticleDatabase,
+    private val refreshOnInit: Boolean
 ) : RemoteMediator<Int, NewsArticle>() {
 
     private val newsArticleDao = newsArticleDb.newsArticleDao()
@@ -27,7 +27,7 @@ class SearchNewsRemoteMediator(
         loadType: LoadType,
         state: PagingState<Int, NewsArticle>
     ): MediatorResult {
-        val page = when (loadType){
+        val page = when (loadType) {
             LoadType.REFRESH -> NEWS_STARTING_PAGE_INDEX
             LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
             LoadType.APPEND -> searchQueryRemoteKeyDao.getRemoteKey(searchQuery).nextPageKey
@@ -35,7 +35,6 @@ class SearchNewsRemoteMediator(
 
         try {
             val response = newsApi.searchNews(searchQuery, page, state.config.pageSize)
-            delay(3000)
             val serverSearchArticles = response.articles
 
             val bookmarkedArticles = newsArticleDao.getAllBookmarkedArticles().first()
@@ -78,9 +77,17 @@ class SearchNewsRemoteMediator(
             }
             return MediatorResult.Success(endOfPaginationReached = serverSearchArticles.isEmpty())
         } catch (exception: IOException) {
-            return MediatorResult.Error (exception)
+            return MediatorResult.Error(exception)
         } catch (exception: HttpException) {
-            return MediatorResult.Error (exception)
+            return MediatorResult.Error(exception)
+        }
+    }
+
+    override suspend fun initialize(): InitializeAction {
+        return if (refreshOnInit) {
+            InitializeAction.LAUNCH_INITIAL_REFRESH
+        } else {
+            InitializeAction.SKIP_INITIAL_REFRESH
         }
     }
 

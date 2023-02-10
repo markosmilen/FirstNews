@@ -15,6 +15,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.firstnews.MainActivity
 import com.example.firstnews.R
 import com.example.firstnews.databinding.FragmentBreakingNewsBinding
@@ -51,6 +52,9 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news),
                 viewModel.onBookmarkedClicked(article)
             }
         )
+
+        articleListAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+
 
         binding.apply {
             recyclerView.apply {
